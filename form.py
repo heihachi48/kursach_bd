@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog, scrolledtext
+from tkinter import ttk, messagebox, simpledialog, scrolledtext, filedialog
 import psycopg2
-
+import pandas as pd
+import os
 class MainInterface:
     def __init__(self, root):
         self.root = root
@@ -18,6 +19,7 @@ class MainInterface:
         self.cursor = self.connection.cursor()
 
         self.button_complex_query = tk.Button(root, text="Отчет", command=self.show_complex_query_window)
+        self.button_save_to_excel = tk.Button(root, text="Сохранить в Excel", command=self.save_to_excel)
         # Создание и заполнение выпадающего списка таблиц
         self.tables_label = tk.Label(root, text="Выберите таблицу:")
         self.tables_combobox = ttk.Combobox(root, values=self.get_table_names())
@@ -48,6 +50,7 @@ class MainInterface:
         self.button_update.grid(row=0, column=4, padx=5)
         self.button_delete.grid(row=0, column=5, padx=5)
         self.button_complex_query.grid(row=2, column=7, padx=5)
+        self.button_save_to_excel.grid(row=2, column=8, padx=5)
 
     def get_table_names(self):
         self.cursor.execute(
@@ -194,7 +197,82 @@ class MainInterface:
         except Exception as e:
             messagebox.showerror("Ошибка выполнения запроса", f"Произошла ошибка: {e}")
 
-    # Примеры методов для выполнения конкретных запросов
+    def save_to_excel(self):
+        # Открываем окно с запросами для выбора запроса
+        complex_query_window = tk.Toplevel(self.root)
+        complex_query_window.title("Сохранение в Excel")
+
+        # Многострочное текстовое поле для ввода SQL-запроса
+        query_text = scrolledtext.ScrolledText(complex_query_window, wrap=tk.WORD, width=40, height=10)
+        query_text.grid(row=0, column=0, padx=10, pady=10)
+
+        # Выпадающий список с выбором запроса
+        query_options = [
+            "Запрос 1",
+            "Запрос 2",
+            "Запрос 3",
+            "Запрос 4",
+            "Запрос 5",
+            "Запрос 6"
+        ]
+        query_combobox = ttk.Combobox(complex_query_window, values=query_options)
+        query_combobox.set("Выберите запрос")
+        query_combobox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Кнопка для выполнения запроса и сохранения в Excel
+        execute_button = tk.Button(complex_query_window, text="Сохранить в Excel",
+                                   command=lambda: self.save_query_to_excel(query_combobox.get(),
+                                                                            query_text.get("1.0", tk.END)))
+        execute_button.grid(row=1, column=0, columnspan=2, pady=10)
+
+    def save_query_to_excel(self, selected_query, query):
+        try:
+            # Выполнение выбранного запроса
+            result = None
+            if selected_query == "Запрос 1":
+                result = self.query1()
+            elif selected_query == "Запрос 2":
+                result = self.query2()
+            elif selected_query == "Запрос 3":
+                result = self.query3()
+            elif selected_query == "Запрос 4":
+                result = self.query4()
+            elif selected_query == "Запрос 5":
+                result = self.query5()
+            elif selected_query == "Запрос 6":
+                result = self.query6()
+
+            # Если результат получен, сохраняем его в Excel
+            if result:
+                # Создаем DataFrame из результата запроса
+                df = pd.DataFrame(result)
+
+                # Открываем окно сохранения файла
+                file_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
+                                                            filetypes=[("Файлы Excel", "*.xlsx")])
+                if file_path:
+                    # Сохраняем DataFrame в Excel
+                    df.to_excel(file_path, index=False)
+                    messagebox.showinfo("Сохранение в Excel", "Результат успешно сохранен в Excel")
+
+                    # Предлагаем открыть файл
+                    open_file = messagebox.askyesno("Открыть файл", "Хотите открыть сохраненный файл?")
+                    if open_file:
+                        self.open_excel_file(file_path)
+        except Exception as e:
+            messagebox.showerror("Ошибка сохранения в Excel", f"Произошла ошибка: {e}")
+
+    def open_excel_file(self, file_path):
+        try:
+            # Проверяем, существует ли файл
+            if os.path.exists(file_path):
+                # Открываем файл с использованием системного приложения по умолчанию
+                os.system(f'start excel "{file_path}"')
+            else:
+                messagebox.showwarning("Файл не найден", "Файл не существует.")
+        except Exception as e:
+            messagebox.showerror("Ошибка открытия файла", f"Произошла ошибка: {e}")
+
     def query1(self):
         self.cursor.execute('''
         SELECT r.title, pl.price, pl.expenses, (pl.price + pl.expenses) AS total_cost
