@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 import psycopg2
-from form import MainInterface
+from bdmmain4 import MainInterface
 
 # Создание подключения к PostgreSQL
 connection = psycopg2.connect(
-    database="kursach",
+    database="kursach3",
     user="postgres",
     password="20133102es",
     host="localhost",

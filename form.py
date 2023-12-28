@@ -3,6 +3,8 @@ from tkinter import ttk, messagebox, simpledialog, scrolledtext, filedialog
 import psycopg2
 import pandas as pd
 import os
+
+
 class MainInterface:
     def __init__(self, root):
         self.root = root
@@ -10,7 +12,7 @@ class MainInterface:
 
         # Подключение к PostgreSQL
         self.connection = psycopg2.connect(
-            database="kursach",
+            database="kursach2",
             user="postgres",
             password="20133102es",
             host="localhost",
@@ -108,9 +110,6 @@ class MainInterface:
             if data:
                 # Получаем список столбцов
                 columns = [column[0] for column in self.cursor.description]
-
-                # Здесь должен быть ваш код для открытия диалогового окна с формой для ввода новых данных
-                # Вам нужно получить новые значения для каждого столбца
 
                 # Пример использования simpledialog для получения новых значений
                 new_values = []
